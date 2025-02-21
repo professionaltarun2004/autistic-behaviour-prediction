@@ -1,0 +1,7 @@
+joblib
+pandas
+numpy
+streamlit
+datetime
+plotly
+matplotlib
