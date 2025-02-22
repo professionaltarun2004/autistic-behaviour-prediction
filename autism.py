@@ -529,4 +529,4 @@ with st.container():
     st.markdown('</div>', unsafe_allow_html=True)
 
 # Footer
-st.markdown('<div class="footer">Developed with ❤️ by [Tarun] | Powered by Streamlit & xAI</div>', unsafe_allow_html=True)
+st.markdown('<div class="footer">Developed with ❤️ by [Your Name] | Powered by Streamlit & xAI</div>', unsafe_allow_html=True)
