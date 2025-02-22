@@ -277,7 +277,7 @@ threshold = 0.3
 with st.container():
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.subheader("📏 Manual Input")
-    manual_hr = st.number_input("", min_value=40.0, max_value=160.0, value=80.0, step=1.0, label_visibility="collapsed")
+    manual_hr = st.number_input("Enter Heart rate in bpm", min_value=40.0, max_value=160.0, value=80.0, step=1.0, label_visibility="collapsed")
     
     col1, col2 = st.columns([1, 1])
     with col1:
