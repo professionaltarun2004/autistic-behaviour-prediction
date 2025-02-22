@@ -1,4 +1,4 @@
-# app.py
+# autism.py
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -10,11 +10,17 @@ import plotly.graph_objects as go
 # --- Load Pre-trained Model and Scaler ---
 @st.cache_resource
 def load_model_and_scaler():
-    rf_model = joblib.load('panic_attack_rf_model.pkl')
-    scaler = joblib.load('scaler.pkl')
-    return rf_model, scaler
+    try:
+        rf_model = joblib.load('panic_attack_rf_model.pkl')
+        scaler = joblib.load('scaler.pkl')
+        return rf_model, scaler
+    except FileNotFoundError as e:
+        st.error(f"Error loading files: {e}. Please ensure 'panic_attack_rf_model.pkl' and 'scaler.pkl' are in the repository.")
+        return None, None
 
 rf_model, scaler = load_model_and_scaler()
+if rf_model is None or scaler is None:
+    st.stop()
 
 # Define features
 features = ['heart_rate', 'hour', 'minute', 'hr_rolling_mean', 'hr_rolling_std', 'hr_change']
@@ -39,9 +45,8 @@ def prepare_realtime_data(current_hr, history, scaler, features, activity_risk):
         'hr_change': [hr_change]
     }, columns=features)
     
-    # Simulate activity for this reading
     activities = activity_risk.index.tolist()
-    activity_weights = activity_risk.values / activity_risk.sum()  # Normalize to probabilities
+    activity_weights = activity_risk.values / activity_risk.sum()
     current_activity = np.random.choice(activities, p=activity_weights)
     
     return scaler.transform(data_point), current_activity
@@ -277,7 +282,7 @@ threshold = 0.3
 with st.container():
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.subheader("📏 Manual Input")
-    manual_hr = st.number_input("Enter Heart rate in bpm", min_value=40.0, max_value=160.0, value=80.0, step=1.0, label_visibility="collapsed")
+    manual_hr = st.number_input("Enter Heart Rate (BPM)", min_value=40.0, max_value=160.0, value=80.0, step=1.0, label_visibility="collapsed")
     
     col1, col2 = st.columns([1, 1])
     with col1:
@@ -394,6 +399,7 @@ with st.container():
     if st.button("Start"):
         status.markdown('<div class="loader"></div>', unsafe_allow_html=True)
         time.sleep(1)
+        iteration = 0  # Counter for unique keys
         
         while True:
             hr = get_heart_rate()
@@ -416,10 +422,9 @@ with st.container():
                 st.session_state.hrv_data.pop(0)
                 st.session_state.activity_data.pop(0)
             
-            # Infer likely cause if panic attack predicted
             likely_cause = current_activity if prediction else "None"
+            iteration += 1  # Increment counter for unique keys
             
-            # Charts
             fig_hr = go.Figure()
             fig_hr.add_trace(go.Scatter(
                 x=st.session_state.timestamps,
@@ -442,7 +447,7 @@ with st.container():
                 height=300,
                 transition={'duration': 600, 'easing': 'cubic-in-out'}
             )
-            hr_chart.plotly_chart(fig_hr, use_container_width=True)
+            hr_chart.plotly_chart(fig_hr, use_container_width=True, key=f"hr_chart_{iteration}")
             
             fig_hrv = go.Figure()
             fig_hrv.add_trace(go.Bar(
@@ -464,7 +469,7 @@ with st.container():
                 height=300,
                 transition={'duration': 600, 'easing': 'cubic-in-out'}
             )
-            hrv_chart.plotly_chart(fig_hrv, use_container_width=True)
+            hrv_chart.plotly_chart(fig_hrv, use_container_width=True, key=f"hrv_chart_{iteration}")
             
             fig_radial = go.Figure()
             fig_radial.add_trace(go.Barpolar(
@@ -487,7 +492,7 @@ with st.container():
                 showlegend=False,
                 transition={'duration': 600, 'easing': 'cubic-in-out'}
             )
-            radial_chart.plotly_chart(fig_radial, use_container_width=True)
+            radial_chart.plotly_chart(fig_radial, use_container_width=True, key=f"radial_chart_{iteration}")
             
             fig_proba_trend = go.Figure()
             fig_proba_trend.add_trace(go.Scatter(
@@ -511,9 +516,8 @@ with st.container():
                 height=300,
                 transition={'duration': 600, 'easing': 'cubic-in-out'}
             )
-            proba_trend_chart.plotly_chart(fig_proba_trend, use_container_width=True)
+            proba_trend_chart.plotly_chart(fig_proba_trend, use_container_width=True, key=f"proba_trend_chart_{iteration}")
             
-            # Status Indicator with Likely Cause
             status.markdown(
                 f'<span style="color: {"#FF6B6B" if prediction else "#4CAF50"}; font-size: 24px; font-weight: bold;" class="status-pulse">'
                 f'HR: {hr:.1f} | {"⚠️ Risk" if prediction else "✅ Safe"}</span><br>'
@@ -525,4 +529,4 @@ with st.container():
     st.markdown('</div>', unsafe_allow_html=True)
 
 # Footer
-st.markdown('<div class="footer">Developed with ❤️ by [Your Name] | Powered by Streamlit & xAI</div>', unsafe_allow_html=True)
+st.markdown('<div class="footer">Developed with ❤️ by [Tarun] | Powered by Streamlit & xAI</div>', unsafe_allow_html=True)
