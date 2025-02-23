@@ -3,11 +3,11 @@
 #include <Wire.h>
 #include "MAX30105.h"
 
-#define WIFI_SSID "Tarun"
-#define WIFI_PASSWORD "Botarun@123"
+#define WIFI_SSID ""
+#define WIFI_PASSWORD ""
 
-#define FIREBASE_HOST "joystick-dc535-default-rtdb.asia-southeast1.firebasedatabase.app"
-#define FIREBASE_AUTH "EnMSmfIoMO1D8mawx8y5mtarvpT1bHd6seAbL1QO"
+#define FIREBASE_HOST ""
+#define FIREBASE_AUTH ""
 
 FirebaseData firebaseData;
 FirebaseAuth auth;
